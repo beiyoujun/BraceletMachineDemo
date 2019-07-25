@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.ocm.lib:smart_reception_sdk:0.1.11@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/605119a7bad7eca6e3a74cb95c8f780f/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/605119a7bad7eca6e3a74cb95c8f780f/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ocm.lib/smart_reception_sdk/0.1.11/5ecd19cc2f9e22bb3b2394a57b6260eb17398a39/smart_reception_sdk-0.1.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
