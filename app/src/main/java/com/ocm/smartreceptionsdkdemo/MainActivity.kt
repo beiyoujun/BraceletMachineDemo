@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.ocm.smart_reception_sdk.BraceletMachineListener
-import com.ocm.smart_reception_sdk.BraceletMachineManager
-import com.ocm.smart_reception_sdk.BraceletMachineSystemListener
-import com.ocm.smart_reception_sdk.CheckGiveBackCallback
+import com.ocm.smart_reception_sdk.*
+import com.ocm.smart_reception_sdk.BraceletMachineManager.checkSelf
 import com.ocm.smart_reception_sdk.Machine.CardDataModel
+import com.zyao89.view.zloading.ZLoadingDialog
+import com.zyao89.view.zloading.Z_TYPE
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : Activity(), View.OnClickListener {
     internal var TAG = "SMARTRECEPTINOSDKDEMO"
+    lateinit var loader:ZLoadingDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,37 +27,13 @@ class MainActivity : Activity(), View.OnClickListener {
         back_bracelet.setOnClickListener(this)
         open_back.setOnClickListener(this)
         close_back.setOnClickListener(this)
-        BraceletMachineManager.init(this)
-        BraceletMachineManager.setSystemListener(object:BraceletMachineSystemListener{
-            override fun onFail() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                open_back.setEnabled(true)
-                close_back.setEnabled(true)
-            }
-
-            override fun onSuccess() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                open_back.setEnabled(true)
-                close_back.setEnabled(true)
-            }
-
-        })
+        loader = ZLoadingDialog(this)
+                .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
+                .setLoadingBuilder(Z_TYPE.CIRCLE)
+        BraceletMachineManager.configHost("smartgymdemo.ocmcom.com");
+        BraceletMachineManager.bind(this,"123456","123456");
         BraceletMachineManager.setBraceletMachineListener(object : BraceletMachineListener{
-            override fun checkAllowGiveBack(card: CardDataModel, callback: CheckGiveBackCallback) {
-                showToast("获取到卡号:" + card.CardNo + "柜号:" + card.CabinetNos)
-                //允许归还
-                callback.allow( true,"")
-                Log.i(TAG, "checkAllowGiveBack")
-//                如果不允许归还
-//                callback.allow( false,"手环异常");
-            }
-
-            override fun onCheckSelfBack(isSuccess: Boolean, msg: String) {
-                check_self.setEnabled(false)
-                back_bracelet.setEnabled(true)
-                fetch_bracelet.setEnabled(true)
-                showToast("自检完成: 结果" + if (isSuccess) "成功" else "失败")
-            }
 
             override fun onCurrentNumChange(num: Int) {
                 Log.i(TAG, "onCurrentNumChange:$num")
@@ -68,33 +45,7 @@ class MainActivity : Activity(), View.OnClickListener {
             }
 
             override fun onDisconnect() {
-                Log.i(TAG, "onDisconnect")
                 showToast("设备连接已断开")
-            }
-
-            override fun onFetchFail(msg: String) {
-                Log.i(TAG, "onFetchSuccess:$msg")
-                showToast("取手环成功 手环号:$msg")
-            }
-
-            override fun onFetchSuccess(no: String) {
-                Log.i(TAG, "onFetchFail:$no")
-                showToast("取手环失败")
-            }
-
-            override fun onGiveBackBusy() {
-                Log.i(TAG, "onGiveBackBusy")
-                showToast("设备忙碌中，请稍等")
-            }
-
-            override fun onGiveBackFail(msg: String) {
-                Log.i(TAG, "onGiveBackFail:$msg")
-                showToast("归还手环失败")
-            }
-
-            override fun onGiveBackSuccess(no: String) {
-                Log.i(TAG, "onGiveBackSuccess:$no")
-                showToast("归还手环成功 手环号:$no")
             }
 
             override fun onStateChange(isStop: Boolean) {
@@ -102,42 +53,130 @@ class MainActivity : Activity(), View.OnClickListener {
                 if(isStop)
                     showToast("设备暂停");
             }
-
         })
+    }
+
+    fun btnEnable() {
+        open_back.setEnabled(true)
+        close_back.setEnabled(true)
     }
 
     override fun onClick(p0: View?) {
         when(p0?.id){
-            R.id.check_self ->BraceletMachineManager.checkSelf()
+            R.id.check_self ->checkSelf()
             R.id.fetch_bracelet-> fetchBracelet()
             R.id.back_bracelet-> backBracelet()
             R.id.open_back-> {
-                BraceletMachineManager.sysStartPush()
+                BraceletMachineManager.sysStartPush(object :BraceletMachineSystemListener{
+                    override fun onFail() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        btnEnable();
+                    }
+
+                    override fun onSuccess() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        btnEnable();
+                    }
+
+                });
                 open_back.setEnabled(false)
             }
             R.id.close_back-> {
-                BraceletMachineManager.sysStopPush()
+                BraceletMachineManager.sysStopPush(object :BraceletMachineSystemListener{
+                    override fun onFail() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        btnEnable();
+                    }
+                    override fun onSuccess() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        btnEnable();
+                    }
+
+                })
                 close_back.setEnabled(false)
             }
         }
     }
+    fun checkSelf(){
+        //IC手环
+        loader.show();
+        checkSelf(BraceletMachineManager.CardType.ID,object :CheckSelfCallback{
+            override fun onCheckSelfFail(msg: String) {
+                super.onCheckSelfFail(msg)
+                check_self.setEnabled(true)
+                back_bracelet.setEnabled(false)
+                fetch_bracelet.setEnabled(false)
+                showToast("自检失败$msg");
+            }
+
+            override fun onCheckSelfSuccess() {
+                super.onCheckSelfSuccess()
+                check_self.setEnabled(false)
+                back_bracelet.setEnabled(true)
+                fetch_bracelet.setEnabled(true)
+                btnEnable();
+                showToast("自检成功");
+            }
+
+            override fun onCompleted() {
+                super.onCompleted()
+                loader.dismiss();
+            }
+        });
+    }
 
     internal fun fetchBracelet() {
-        if (BraceletMachineManager.checkHasBracelet()) {
-            BraceletMachineManager.fetchBracelet()
-        } else {
-            showToast("取手环失败 暂无手环")
-        }
+        BraceletMachineManager.fetchBracelet(object:FetchCallback{
+            override fun onCompleted() {
+                super.onCompleted()
+            }
+
+            override fun onFetchFail(msg: String) {
+                super.onFetchFail(msg)
+                showToast("取手环失败 :$msg")
+            }
+
+            override fun onFetchSuccess(no: String) {
+                super.onFetchSuccess(no)
+                showToast("取手环成功 手环号:$no")
+            }
+
+        });
     }
     internal fun showToast(msg: String) {
+        Log.i("smart",msg);
         runOnUiThread { Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show() }
     }
     internal fun backBracelet() {
-        if (!BraceletMachineManager.checkIsFull()) {
-            BraceletMachineManager.giveBackBracelet()
-        } else {
-            showToast("归还手环失败 手环已满")
-        }
+        showToast("请将手环放置回收口")
+        BraceletMachineManager.giveBackBracelet(object:GiveBackCallback{
+            override fun checkAllowGiveBack(card: CardDataModel, callback: CheckGiveBackCallback) {
+                super.checkAllowGiveBack(card, callback)
+                showToast("获取到卡号: ${card.CardNo} 柜号:${card.CabinetNos}")
+                //允许归还
+                callback.allow( true,"")
+            }
+
+            override fun onCompleted() {
+                super.onCompleted()
+            }
+
+            override fun onGiveBackBusy() {
+                super.onGiveBackBusy()
+                showToast("设备忙碌中，请稍等")
+            }
+
+            override fun onGiveBackFail(msg: String) {
+                super.onGiveBackFail(msg)
+                showToast("归还手环失败")
+            }
+
+            override fun onGiveBackSuccess(no: String) {
+                super.onGiveBackSuccess(no)
+                showToast("归还手环成功 手环号:$no")
+            }
+
+        });
     }
 }
 

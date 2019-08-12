@@ -31,13 +31,14 @@
     <Button
         android:id="@+id/open_back"
         android:text="打开归还口"
+        android:enabled="false"
         android:layout_width="300dp"
         android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/close_back"
         android:text="关闭归还口"
+        android:enabled="false"
         android:layout_width="300dp"
         android:layout_height="wrap_content" />
-
 </LinearLayout>
