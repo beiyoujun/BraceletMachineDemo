@@ -56,6 +56,7 @@ class MainActivity : Activity(), View.OnClickListener {
         })
     }
 
+
     fun btnEnable() {
         open_back.setEnabled(true)
         close_back.setEnabled(true)
@@ -67,33 +68,29 @@ class MainActivity : Activity(), View.OnClickListener {
             R.id.fetch_bracelet-> fetchBracelet()
             R.id.back_bracelet-> backBracelet()
             R.id.open_back-> {
+                open_back.setEnabled(false)
                 BraceletMachineManager.sysStartPush(object :BraceletMachineSystemListener{
                     override fun onFail() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         btnEnable();
                     }
 
                     override fun onSuccess() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         btnEnable();
                     }
 
                 });
-                open_back.setEnabled(false)
             }
             R.id.close_back-> {
+                close_back.setEnabled(false)
                 BraceletMachineManager.sysStopPush(object :BraceletMachineSystemListener{
                     override fun onFail() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         btnEnable();
                     }
                     override fun onSuccess() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         btnEnable();
                     }
 
                 })
-                close_back.setEnabled(false)
             }
         }
     }

@@ -148,6 +148,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 checkSelf();
                 break;
             case R.id.open_back:
+                openBackBtn.setEnabled(false);
                 bmManager.sysStartPush(new BraceletMachineSystemListener() {
                     @Override
                     public void onSuccess() {
@@ -159,9 +160,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         btnEnable();
                     }
                 });
-                openBackBtn.setEnabled(false);
                 break;
             case R.id.close_back:
+                closeBackBtn.setEnabled(false);
                 bmManager.sysStopPush(new BraceletMachineSystemListener() {
                     @Override
                     public void onSuccess() {
@@ -173,7 +174,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         btnEnable();
                     }
                 });
-                closeBackBtn.setEnabled(false);
                 break;
         }
     }
