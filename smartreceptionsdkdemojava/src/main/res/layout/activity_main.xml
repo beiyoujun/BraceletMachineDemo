@@ -6,39 +6,171 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="15dp"
         android:gravity="center"
         tools:context=".MainActivity">
+    <TextView
+        android:id="@+id/mac"
+        android:text=""
+        android:textSize="24sp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
+    <LinearLayout
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="离线模式"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Switch
+            android:id="@+id/switch_mode"
+            android:checked="true"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:switchMinWidth="50dp"/>
+        <TextView
+            android:text="在线模式"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/refresh"
+        android:enabled="false"
+        android:text="刷新离线版授权时间"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <Button
         android:id="@+id/check_self"
         android:text="自检"
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/fetch_bracelet"
+            android:layout_weight="1"
+            android:text="取手环"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/back_bracelet"
+            android:layout_weight="1"
+            android:text="归还手环"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/fetch_mul_bracelet"
+            android:text="取多个手环"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/open_back"
+            android:text="打开归还口"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/fetch_bracelet"
-        android:text="取手环"
-        android:enabled="false"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content" />
-    <Button
-        android:id="@+id/back_bracelet"
-        android:text="归还手环"
-        android:enabled="false"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/open_back"
-        android:text="打开归还口"
-        android:enabled="false"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/close_back"
-        android:text="关闭归还口"
-        android:enabled="false"
-        android:layout_width="300dp"
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/close_back"
+            android:text="关闭归还口"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="关闭LED"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/switch_led_light"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:switchMinWidth="50dp"
+                android:textOn="on"
+                android:textOff="off" />
+            <TextView
+                android:text="打开LED"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="关闭红外灯"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/switch_ir_light"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:switchMinWidth="50dp"
+                android:textOn="on"
+                android:textOff="off" />
+            <TextView
+                android:text="打开红外灯"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="关闭二维码"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Switch
+            android:id="@+id/switch_qrcode"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:switchMinWidth="50dp"
+            android:textOn="on"
+            android:textOff="off" />
+        <TextView
+            android:text="打开二维码"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <EditText
+        android:focusable="false"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
