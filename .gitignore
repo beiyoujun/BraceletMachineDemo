@@ -66,3 +66,4 @@ fastlane/readme.md
 /gradlew
 /.idea
 /build.gradle
+/build.py
