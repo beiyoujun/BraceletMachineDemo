@@ -17,23 +17,28 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : Activity(), View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     internal var TAG = "SMARTRECEPTINOSDKDEMO"
-    internal var APPKEY ="填写您的APPKEY";
-    internal var APPSECRET ="填写您的APPSECRET";
+    internal var APPKEY ="your APPKEY";
+    internal var APPSECRET ="your APPSECRET";
 
     lateinit var loader:ZLoadingDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView();
+        init();
     }
 
     private fun initView(){
         check_self.setOnClickListener(this)
+        online.setOnClickListener(this)
+        offline.setOnClickListener(this)
         fetch_bracelet.setOnClickListener(this)
         fetch_mul_bracelet.setOnClickListener(this)
         back_bracelet.setOnClickListener(this)
         open_back.setOnClickListener(this)
         close_back.setOnClickListener(this)
+        stop.setOnClickListener(this)
+        get_bracelet_status.setOnClickListener(this)
         switch_qrcode.setOnCheckedChangeListener(this)
         switch_led_light.setOnCheckedChangeListener(this)
         switch_ir_light.setOnCheckedChangeListener(this)
@@ -46,10 +51,8 @@ class MainActivity : Activity(), View.OnClickListener, CompoundButton.OnCheckedC
         mac.setText(MacHelper.getLocalMac(this));
     }
 
-    fun bind(isOnline: Boolean) {
-        BraceletMachineManager.isDebug = false
-        if (isOnline) BraceletMachineManager.bind(this, APPKEY, APPSECRET) else BraceletMachineManager.bind(this)
-        setMode(isOnline)
+    fun init() {
+        BraceletMachineManager.bind(this, APPKEY, APPSECRET)
         BraceletMachineManager.setBraceletMachineListener(object : BraceletMachineListener {
             override fun onDisconnect() {
                 Log.i(TAG, "onDisconnect")
@@ -83,7 +86,6 @@ class MainActivity : Activity(), View.OnClickListener, CompoundButton.OnCheckedC
                     }
 
                     override fun onCompleted() {
-                        checkSelf()
                     }
                 })
     }
@@ -149,7 +151,9 @@ class MainActivity : Activity(), View.OnClickListener, CompoundButton.OnCheckedC
     }
     override fun onClick(p0: View?) {
         when(p0?.id){
-            R.id.check_self ->bind(switch_mode.isChecked())
+            R.id.check_self ->checkSelf()
+            R.id.offline ->setMode(false)
+            R.id.online ->setMode(true)
             R.id.fetch_bracelet-> fetchBracelet()
             R.id.back_bracelet-> backBracelet()
             R.id.fetch_mul_bracelet-> fetchMulBracelet()
@@ -178,6 +182,25 @@ class MainActivity : Activity(), View.OnClickListener, CompoundButton.OnCheckedC
 
                 })
             }
+            R.id.get_bracelet_status->
+                BraceletMachineManager.fetchStatus(object :CheckStatusCallback {
+                    override fun onSuccess(braceletMachineStatus: BraceletMachineManager.BraceletMachineStatus) {
+                        when(braceletMachineStatus){
+                            BraceletMachineManager.BraceletMachineStatus.HAS_CACHE->showToast("获取成功:有缓存")
+                            BraceletMachineManager.BraceletMachineStatus.NO_CACHE->showToast("获取成功:无缓存")
+                            BraceletMachineManager.BraceletMachineStatus.BUSY->showToast("获取成功:忙碌")
+                        }
+                    }
+                    override fun onFail(s: String) {
+                        showToast("获取失败："+s);
+                    }
+                    override fun onCompleted() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+
+                })
+            R.id.stop->
+                BraceletMachineManager.stopRoll();
         }
     }
 

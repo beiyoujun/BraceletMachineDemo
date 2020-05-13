@@ -37,7 +37,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-//    implementation (name:'bracelet_machine_sdk-release-1.0.10.7-6',ext:'aar')
-    implementation 'com.ocm.lib:bracelet_machine_sdk:1.0.+'
+    implementation "com.ocm.lib:bracelet_machine_sdk:$bracelet_sdk_version"
     implementation 'com.zyao89:zloading:1.0.11'
 }

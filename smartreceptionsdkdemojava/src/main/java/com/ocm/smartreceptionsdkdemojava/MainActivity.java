@@ -16,6 +16,7 @@ import com.ocm.bracelet_machine_sdk.BraceletMachineManager;
 import com.ocm.bracelet_machine_sdk.BraceletMachineSystemListener;
 import com.ocm.bracelet_machine_sdk.CheckGiveBackCallback;
 import com.ocm.bracelet_machine_sdk.CheckSelfCallback;
+import com.ocm.bracelet_machine_sdk.CheckStatusCallback;
 import com.ocm.bracelet_machine_sdk.DefaultCallback;
 import com.ocm.bracelet_machine_sdk.FetchCallback;
 import com.ocm.bracelet_machine_sdk.GiveBackCallback;
@@ -23,20 +24,21 @@ import com.ocm.bracelet_machine_sdk.Machine.CardDataModel;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.ocm.bracelet_machine_sdk.BraceletMachineManager.INSTANCE;
 import static com.ocm.bracelet_machine_sdk.BraceletMachineManager.SectorType;
 
 public class MainActivity extends Activity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-    Button fetchBraceletBtn,backBraceletBtn,checkSelfBtn,openBackBtn,closeBackBtn,fetchMulBraceletBtn,refreshBtn;
+    Button fetchBraceletBtn,backBraceletBtn,checkSelfBtn,openBackBtn,closeBackBtn,fetchMulBraceletBtn,refreshBtn,offLine,onLine,getBraceletStatusBtn,stopBtn;
     TextView mac;
-    Switch switchQRCode,switchMode,swtichLedLight,swtichIRLight;
+    Switch switchQRCode,swtichLedLight,swtichIRLight;
     BraceletMachineManager bmManager;
     ZLoadingDialog loader;
     String TAG = "SMARTRECEPTINOSDKDEMO";
-    String APPKEY = "填写您的appkey";
-    String APPSECRET = "填写您的appSecret";
-    boolean isBinded = false;
+    String APPKEY = "your appkey";
+    String APPSECRET = "your appSecret";
 
     Handler handler = new Handler();
 
@@ -45,6 +47,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        init();
     }
 
 
@@ -53,39 +56,44 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         backBraceletBtn = (Button)findViewById(R.id.back_bracelet);
         fetchMulBraceletBtn = (Button)findViewById(R.id.fetch_mul_bracelet);
         checkSelfBtn = (Button)findViewById(R.id.check_self);
+        getBraceletStatusBtn = (Button)findViewById(R.id.get_bracelet_status);
+        stopBtn = (Button)findViewById(R.id.stop);
+        offLine = (Button)findViewById(R.id.offline);
+        onLine = (Button)findViewById(R.id.online);
         refreshBtn = (Button)findViewById(R.id.refresh);
         openBackBtn = (Button)findViewById(R.id.open_back);
         closeBackBtn = (Button)findViewById(R.id.close_back);
         switchQRCode = findViewById(R.id.switch_qrcode);
-        switchMode = findViewById(R.id.switch_mode);
         swtichLedLight = findViewById(R.id.switch_led_light);
         swtichIRLight = findViewById(R.id.switch_ir_light);
-        mac = findViewById(R.id.mac);
-        loader = new ZLoadingDialog(this)
-                    .setCancelable(false)
-                    .setCanceledOnTouchOutside(false)
-                    .setLoadingBuilder(Z_TYPE.CIRCLE);
         switchQRCode.setOnCheckedChangeListener(this);
         swtichLedLight.setOnCheckedChangeListener(this);
         swtichIRLight.setOnCheckedChangeListener(this);
-        switchMode.setOnCheckedChangeListener(this);
         checkSelfBtn.setOnClickListener(this);
+        getBraceletStatusBtn.setOnClickListener(this);
+        stopBtn.setOnClickListener(this);
+        offLine.setOnClickListener(this);
+        onLine.setOnClickListener(this);
         fetchBraceletBtn.setOnClickListener(this);
         fetchMulBraceletBtn.setOnClickListener(this);
         backBraceletBtn.setOnClickListener(this);
         openBackBtn.setOnClickListener(this);
         closeBackBtn.setOnClickListener(this);
         refreshBtn.setOnClickListener(this);
+        mac = findViewById(R.id.mac);
+        loader = new ZLoadingDialog(this)
+                    .setCancelable(false)
+                    .setCanceledOnTouchOutside(false)
+                    .setLoadingBuilder(Z_TYPE.CIRCLE);
 
-        bmManager = INSTANCE;
-        mac.setText(MacHelper.getLocalMac(this));
+        String macaddr =MacHelper.getLocalMac(this);
+        Log.i(TAG, "get mac:"+macaddr);
+        mac.setText(macaddr);
     }
 
-    void bind(boolean isOnline){
-        bmManager.setDebug(false);
-        if(isOnline)bmManager.bind(this,APPKEY,APPSECRET);
-        else bmManager.bind(this);
-        setMode(isOnline);
+    void init(){
+        bmManager = INSTANCE;
+        bmManager.bind(this,APPKEY,APPSECRET);
         bmManager.setBraceletMachineListener(new BraceletMachineListener() {
             @Override
             public void onDisconnect() {
@@ -111,8 +119,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         });
     }
 
-    void setMode(boolean isOnline){
-        bmManager.setBraceletMode(isOnline?
+    void setMode(boolean isOnlineModel){
+        showToast((isOnlineModel?"在线":"离线")+"模式");
+        bmManager.setBraceletMode(isOnlineModel?
                         BraceletMachineManager.BraceletMode.ONLINE:
                         BraceletMachineManager.BraceletMode.OFFLINE,
                 new DefaultCallback() {
@@ -121,6 +130,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                         showToast("切换模式成功:"+s);
                     }
 
+
                     @Override
                     public void onFail(String s) {
                         showToast("切换模式失败:"+s);
@@ -128,7 +138,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
 
                     @Override
                     public void onCompleted() {
-                        checkSelf();
                     }
                 });
     }
@@ -156,7 +165,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                     public void run() {
                         showToast("自检成功");
                         setBtnEnable(true);
-                        loader.dismiss();
                     }
                 });
             }
@@ -168,7 +176,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                     public void run() {
                         setBtnEnable(false);
                         showToast("自检失败:"+s);
-                        loader.dismiss();
                     }
                 });
             }
@@ -181,6 +188,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         fetchMulBraceletBtn.setEnabled(enable);
         openBackBtn.setEnabled(enable);
         closeBackBtn.setEnabled(enable);
+        stopBtn.setEnabled(enable);
+        getBraceletStatusBtn.setEnabled(enable);
     }
     @Override
     public void onClick(View view) {
@@ -195,7 +204,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                 backBracelet();
                 break;
             case R.id.check_self:
-                bind(switchMode.isChecked());
+                checkSelf();
+                break;
+            case R.id.offline:
+                setMode(false);
+                break;
+            case R.id.online:
+                setMode(true);
                 break;
             case R.id.open_back:
                 openBackBtn.setEnabled(false);
@@ -225,6 +240,47 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                     }
                 });
                 break;
+            case R.id.refresh:
+                bmManager.refreshOfflineAuth(new DefaultCallback() {
+                    @Override
+                    public void onSuccess( String s) {
+                        showToast("刷新成功:"+s);
+                    }
+
+                    @Override
+                    public void onFail( String s) {
+                        showToast("刷新失败:"+s);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+
+                    }
+                });
+                break;
+            case R.id.get_bracelet_status:
+                bmManager.fetchStatus(new CheckStatusCallback() {
+                    @Override
+                    public void onSuccess(@NotNull BraceletMachineManager.BraceletMachineStatus braceletMachineStatus) {
+                        showToast("获取成功："+(braceletMachineStatus == BraceletMachineManager.BraceletMachineStatus.HAS_CACHE?
+                                    "有缓存":(braceletMachineStatus == BraceletMachineManager.BraceletMachineStatus.NO_CACHE)?
+                                    "无缓存":"忙碌中"));
+                    }
+
+                    @Override
+                    public void onFail(@NotNull String s) {
+                        showToast("获取失败："+s);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+
+                    }
+                });
+                break;
+            case R.id.stop:
+                bmManager.stopRoll();
+                break;
         }
     }
 
@@ -243,7 +299,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this,msg,Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,msg,Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -268,7 +324,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
 
             @Override
             public void onCompleted() {
-
+                showToast("取手环 onCompleted");
             }
         });
     }
@@ -308,10 +364,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
         bmManager.giveBackBracelet(SectorType.SECTOR2,sectorPwd,blockContent, new GiveBackCallback() {
             @Override
             public void checkAllowGiveBack(CardDataModel cardDataModel, CheckGiveBackCallback checkGiveBackCallback) {
-                showToast("获取到卡号:"+cardDataModel.CardNo+"柜号:"+cardDataModel.CabinetNos);
                 //允许归还
                 checkGiveBackCallback.allow(true,"OK");
-                Log.i(TAG,"checkAllowGiveBack");
+                showToast("获取到卡号:"+cardDataModel.CardNo+"柜号:"+cardDataModel.CabinetNos);
             }
 
             @Override
@@ -362,9 +417,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Comp
                 if (isChecked)bmManager.openIRLight();
                 else bmManager.closeIRLight();
             break;
-            case R.id.switch_mode:
-                showToast("切换模式:"+(isChecked?"在线":"离线"));
-                break;
 
         }
     }

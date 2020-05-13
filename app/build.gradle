@@ -37,5 +37,5 @@ dependencies {
 
     implementation 'com.zyao89:zloading:1.0.11'
 
-    implementation 'com.ocm.lib:bracelet_machine_sdk:1.0.+'
+    implementation "com.ocm.lib:bracelet_machine_sdk:$bracelet_sdk_version"
 }
